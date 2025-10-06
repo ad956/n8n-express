@@ -26,7 +26,7 @@ npm start
 - `GET /health` - Server health check
 - `GET /info` - Server and n8n information
 - `GET /n8n/status` - n8n process status
-- `POST /n8n/start` - Start n8n manually
+- `GET /n8n/start` - Start n8n manually
 
 ## Access
 

@@ -64,7 +64,7 @@ app.get('/n8n/status', (req, res) => {
 });
 
 // Start n8n endpoint
-app.post('/n8n/start', (req, res) => {
+app.get('/n8n/start', (req, res) => {
   if (n8nProcess) {
     return res.json({ message: 'n8n is already running' });
   }
