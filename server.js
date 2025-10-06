@@ -1,87 +1,74 @@
 const express = require('express');
 const { spawn } = require('child_process');
+const path = require('path');
 const app = express();
+
 const PORT = process.env.PORT || 3000;
-const N8N_PORT = process.env.N8N_PORT || 5678;
+let n8nProcess;
 
 app.use(express.json());
-
-// Start n8n process
-let n8nProcess;
+app.use(express.static('public'));
 
 function startN8n() {
   console.log('Starting n8n...');
-  n8nProcess = spawn('npx', ['n8n', 'start'], {
-    env: { ...process.env, N8N_PORT: N8N_PORT },
+  n8nProcess = spawn('node', ['./node_modules/n8n/bin/n8n', 'start'], {
+    env: { 
+      ...process.env, 
+      N8N_HOST: '0.0.0.0',
+      N8N_PORT: '5678'
+    },
     stdio: 'inherit'
   });
   
   n8nProcess.on('error', (err) => {
     console.error('Failed to start n8n:', err);
   });
-  
-  n8nProcess.on('close', (code) => {
-    console.log(`n8n process exited with code ${code}`);
-  });
 }
 
-// Graceful shutdown
-process.on('SIGINT', () => {
-  console.log('Shutting down...');
-  if (n8nProcess) {
-    n8nProcess.kill();
-  }
+// Generate daily PIN: MM * DD (max 4 digits)
+function getDailyPin() {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  return String(month * day).padStart(4, '0');
+}
+
+process.on('SIGTERM', () => {
+  if (n8nProcess) n8nProcess.kill();
   process.exit(0);
 });
 
-// Health endpoint
 app.get('/health', (req, res) => {
   res.json({ 
-    status: 'OK', 
-    message: 'Server is running',
-    timestamp: new Date().toISOString()
+    status: 'OK',
+    n8nRunning: !!n8nProcess,
+    uptime: Math.floor(process.uptime())
   });
 });
 
-// Info endpoint
-app.get('/info', (req, res) => {
-  res.json({
-    name: 'n8n-express',
-    version: '1.0.0',
-    description: 'Express server with n8n integration',
-    n8nUrl: `http://localhost:${N8N_PORT}`,
-    expressPort: PORT
-  });
-});
-
-// n8n status endpoint
-app.get('/n8n/status', (req, res) => {
-  res.json({
-    status: n8nProcess ? 'running' : 'stopped',
-    n8nUrl: `http://localhost:${N8N_PORT}`,
-    pid: n8nProcess ? n8nProcess.pid : null
-  });
-});
-
-// Start n8n endpoint
-app.get('/n8n/start', (req, res) => {
-  if (n8nProcess) {
-    return res.json({ message: 'n8n is already running' });
+app.post('/auth', (req, res) => {
+  const { pin } = req.body;
+  const correctPin = getDailyPin();
+  
+  if (pin === correctPin) {
+    res.json({ success: true });
+  } else {
+    res.status(401).json({ success: false, message: 'Invalid PIN' });
   }
-  
-  startN8n();
-  res.json({ 
-    message: 'n8n starting...', 
-    url: `http://localhost:${N8N_PORT}` 
+});
+
+app.get('/api/info', (req, res) => {
+  const baseUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+  res.json({
+    n8nUrl: `${baseUrl.replace(':' + PORT, '')}:5678`,
+    status: n8nProcess ? 'running' : 'stopped',
+    uptime: Math.floor(process.uptime()),
+    todayPin: getDailyPin()
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Express server running on port ${PORT}`);
-  console.log(`n8n will be available at http://localhost:${N8N_PORT}`);
-  
-  // Auto-start n8n
-  setTimeout(() => {
-    startN8n();
-  }, 2000);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Today's PIN: ${getDailyPin()}`);
+  setTimeout(startN8n, 2000);
 });

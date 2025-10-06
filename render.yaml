@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: n8n-express
+    env: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: N8N_PORT
+        value: 5678
+      - key: N8N_HOST
+        value: 0.0.0.0
+      - key: N8N_PROTOCOL
+        value: http
