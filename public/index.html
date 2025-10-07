@@ -225,7 +225,6 @@
                 
                 if (result.success) {
                     authenticated = true;
-                    localStorage.setItem('n8nToken', result.token);
                     errorMsg.classList.add('hidden');
                     showDashboard();
                 } else {
@@ -268,20 +267,7 @@
                 statusEl.className = `status ${info.status}`;
                 
                 document.getElementById('uptime').textContent = info.uptime;
-                const n8nLink = document.getElementById('n8nLink');
-                n8nLink.href = info.n8nUrl;
-                n8nLink.onclick = (e) => {
-                    e.preventDefault();
-                    const token = localStorage.getItem('n8nToken');
-                    const url = new URL(info.n8nUrl, window.location.origin);
-                    fetch(url.pathname, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    }).then(() => {
-                        window.open(info.n8nUrl, '_blank');
-                    }).catch(() => {
-                        showError();
-                    });
-                };
+                document.getElementById('n8nLink').href = info.n8nUrl;
             } catch (error) {
                 console.error('Failed to update status');
             }

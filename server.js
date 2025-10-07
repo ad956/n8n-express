@@ -10,14 +10,7 @@ let n8nProcess;
 app.use(express.json());
 app.use(express.static('public'));
 
-// Block direct n8n access without auth
-app.use('/n8n', (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || authHeader !== `Bearer ${getDailyPin()}`) {
-    return res.redirect('/');
-  }
-  next();
-});
+
 
 function startN8n() {
   console.log('Starting n8n...');
@@ -65,7 +58,7 @@ app.post('/auth', (req, res) => {
   const correctPin = getDailyPin();
   
   if (pin === correctPin) {
-    res.json({ success: true, token: correctPin });
+    res.json({ success: true });
   } else {
     res.status(401).json({ success: false, message: 'Invalid PIN' });
   }
@@ -81,7 +74,12 @@ app.use('/n8n', createProxyMiddleware({
 
 app.get('/api/info', (req, res) => {
   const isLocal = !process.env.RENDER_EXTERNAL_URL;
-  const baseUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+  let baseUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+  
+  // Ensure HTTPS for Render
+  if (!isLocal && baseUrl.startsWith('http://')) {
+    baseUrl = baseUrl.replace('http://', 'https://');
+  }
   
   res.json({
     n8nUrl: isLocal ? `http://localhost:5678` : `${baseUrl}/n8n`,
