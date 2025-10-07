@@ -10,6 +10,15 @@ let n8nProcess;
 app.use(express.json());
 app.use(express.static('public'));
 
+// Block direct n8n access without auth
+app.use('/n8n', (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || authHeader !== `Bearer ${getDailyPin()}`) {
+    return res.redirect('/');
+  }
+  next();
+});
+
 function startN8n() {
   console.log('Starting n8n...');
   const isLocal = !process.env.RENDER_EXTERNAL_URL;
@@ -56,7 +65,7 @@ app.post('/auth', (req, res) => {
   const correctPin = getDailyPin();
   
   if (pin === correctPin) {
-    res.json({ success: true });
+    res.json({ success: true, token: correctPin });
   } else {
     res.status(401).json({ success: false, message: 'Invalid PIN' });
   }
@@ -72,26 +81,16 @@ app.use('/n8n', createProxyMiddleware({
 
 app.get('/api/info', (req, res) => {
   const isLocal = !process.env.RENDER_EXTERNAL_URL;
-  let n8nUrl;
-  
-  if (isLocal) {
-    n8nUrl = `http://localhost:5678`;
-  } else {
-    // Render supports multiple ports - use direct port access
-    const renderUrl = process.env.RENDER_EXTERNAL_URL.replace('https://', '').replace('http://', '');
-    n8nUrl = `https://${renderUrl}:5678`;
-  }
+  const baseUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
   
   res.json({
-    n8nUrl,
+    n8nUrl: isLocal ? `http://localhost:5678` : `${baseUrl}/n8n`,
     status: n8nProcess ? 'running' : 'stopped',
-    uptime: Math.floor(process.uptime()),
-    todayPin: getDailyPin()
+    uptime: Math.floor(process.uptime())
   });
 });
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`Today's PIN: ${getDailyPin()}`);
   setTimeout(startN8n, 2000);
 });

@@ -13,89 +13,206 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
         }
         .container { 
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
             text-align: center;
-            max-width: 400px;
+            max-width: 420px;
             width: 90%;
+            position: relative;
+            animation: slideIn 0.6s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .logo { 
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 1rem;
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
         }
-        .status { 
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            margin: 1rem 0;
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
             font-weight: 500;
         }
-        .running { background: #d4edda; color: #155724; }
-        .stopped { background: #f8d7da; color: #721c24; }
+        .status { 
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            margin: 1.5rem 0;
+            font-weight: 600;
+            font-size: 0.95rem;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        .running { 
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border: 2px solid #b8dacc;
+        }
+        .stopped { 
+            background: linear-gradient(135deg, #f8d7da, #f1b0b7);
+            color: #721c24;
+            border: 2px solid #f1b0b7;
+        }
         input { 
             width: 100%;
-            padding: 1rem;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 1.1rem;
+            padding: 1.2rem;
+            border: 3px solid #e1e5e9;
+            border-radius: 15px;
+            font-size: 1.2rem;
             text-align: center;
-            margin: 1rem 0;
+            margin: 1.5rem 0;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+            transform: scale(1.02);
         }
         button { 
             width: 100%;
-            padding: 1rem;
-            background: #667eea;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 15px;
             font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
-            margin: 0.5rem 0;
+            margin: 0.8rem 0;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        button:hover { background: #5a6fd8; }
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
         .n8n-link { 
             display: inline-block;
-            padding: 1rem 2rem;
-            background: #ff6d5a;
+            padding: 1.2rem 2.5rem;
+            background: linear-gradient(135deg, #ff6d5a, #ff5722);
             color: white;
             text-decoration: none;
-            border-radius: 8px;
-            margin: 1rem 0;
-            font-weight: 500;
+            border-radius: 15px;
+            margin: 1.5rem 0;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .n8n-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 109, 90, 0.4);
         }
         .hidden { display: none; }
-        .info { color: #666; font-size: 0.9rem; margin: 1rem 0; }
+        .info { 
+            color: #888; 
+            font-size: 0.9rem; 
+            margin: 1.5rem 0;
+            font-weight: 500;
+        }
+        .error {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            font-weight: 600;
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s infinite ease-in-out;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
     </style>
 </head>
 <body>
+    <div class="particles"></div>
     <div class="container">
-        <div class="logo">🔗 n8n Portal</div>
+        <div class="logo">🔗 n8n</div>
+        <div class="subtitle">Workflow Automation Portal</div>
         
         <div id="loginForm">
-            <div class="info">Enter today's PIN to access n8n</div>
-            <input type="password" id="pinInput" placeholder="Enter PIN" maxlength="4">
-            <button onclick="authenticate()">Access Portal</button>
-            <div class="info">PIN = Month × Day (4 digits)</div>
+            <input type="password" id="pinInput" placeholder="••••" maxlength="4">
+            <div id="errorMsg" class="error hidden">Access Denied</div>
+            <button onclick="authenticate()">Enter Portal</button>
         </div>
         
         <div id="dashboard" class="hidden">
             <div id="status" class="status">Loading...</div>
-            <div class="info">Uptime: <span id="uptime">-</span> seconds</div>
-            <a id="n8nLink" href="#" target="_blank" class="n8n-link">Open n8n Editor</a>
-            <button onclick="logout()">Logout</button>
+            <div class="info">Uptime: <span id="uptime">-</span>s</div>
+            <a id="n8nLink" href="#" target="_blank" class="n8n-link">Launch n8n</a>
+            <button onclick="logout()">Exit</button>
         </div>
     </div>
 
     <script>
         let authenticated = false;
 
+        // Create floating particles
+        function createParticles() {
+            const particles = document.querySelector('.particles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.width = particle.style.height = Math.random() * 10 + 5 + 'px';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particles.appendChild(particle);
+            }
+        }
+
         async function authenticate() {
             const pin = document.getElementById('pinInput').value;
+            const errorMsg = document.getElementById('errorMsg');
+            
+            if (!pin || pin.length !== 4) {
+                showError();
+                return;
+            }
             
             try {
                 const response = await fetch('/auth', {
@@ -108,13 +225,29 @@
                 
                 if (result.success) {
                     authenticated = true;
+                    localStorage.setItem('n8nToken', result.token);
+                    errorMsg.classList.add('hidden');
                     showDashboard();
                 } else {
-                    alert('Invalid PIN. Try MM × DD format.');
+                    showError();
                 }
             } catch (error) {
-                alert('Connection error');
+                showError();
             }
+        }
+
+        function showError() {
+            const errorMsg = document.getElementById('errorMsg');
+            const input = document.getElementById('pinInput');
+            
+            errorMsg.classList.remove('hidden');
+            input.style.borderColor = '#ff6b6b';
+            input.value = '';
+            
+            setTimeout(() => {
+                errorMsg.classList.add('hidden');
+                input.style.borderColor = '#e1e5e9';
+            }, 3000);
         }
 
         async function showDashboard() {
@@ -135,7 +268,20 @@
                 statusEl.className = `status ${info.status}`;
                 
                 document.getElementById('uptime').textContent = info.uptime;
-                document.getElementById('n8nLink').href = info.n8nUrl;
+                const n8nLink = document.getElementById('n8nLink');
+                n8nLink.href = info.n8nUrl;
+                n8nLink.onclick = (e) => {
+                    e.preventDefault();
+                    const token = localStorage.getItem('n8nToken');
+                    const url = new URL(info.n8nUrl, window.location.origin);
+                    fetch(url.pathname, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }).then(() => {
+                        window.open(info.n8nUrl, '_blank');
+                    }).catch(() => {
+                        showError();
+                    });
+                };
             } catch (error) {
                 console.error('Failed to update status');
             }
@@ -150,6 +296,16 @@
 
         document.getElementById('pinInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') authenticate();
+        });
+
+        // Block direct access without authentication
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            
+            // Block n8n access attempts
+            if (window.location.pathname.startsWith('/n8n') && !authenticated) {
+                window.location.href = '/';
+            }
         });
     </script>
 </body>
