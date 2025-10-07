@@ -1,6 +1,7 @@
 const express = require('express');
 const { spawn } = require('child_process');
 const path = require('path');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 const app = express();
 
 const PORT = process.env.PORT || 3000;
@@ -57,10 +58,20 @@ app.post('/auth', (req, res) => {
   }
 });
 
+// Proxy n8n through our server
+app.use('/n8n', createProxyMiddleware({
+  target: 'http://localhost:5678',
+  changeOrigin: true,
+  pathRewrite: { '^/n8n': '' },
+  ws: true
+}));
+
 app.get('/api/info', (req, res) => {
+  const isLocal = !process.env.RENDER_EXTERNAL_URL;
   const baseUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+  
   res.json({
-    n8nUrl: `${baseUrl.replace(':' + PORT, '')}:5678`,
+    n8nUrl: isLocal ? `http://localhost:5678` : `${baseUrl}/n8n`,
     status: n8nProcess ? 'running' : 'stopped',
     uptime: Math.floor(process.uptime()),
     todayPin: getDailyPin()
