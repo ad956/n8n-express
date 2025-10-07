@@ -12,11 +12,15 @@ app.use(express.static('public'));
 
 function startN8n() {
   console.log('Starting n8n...');
+  const isLocal = !process.env.RENDER_EXTERNAL_URL;
+  
   n8nProcess = spawn('node', ['./node_modules/n8n/bin/n8n', 'start'], {
     env: { 
       ...process.env, 
       N8N_HOST: '0.0.0.0',
-      N8N_PORT: '5678'
+      N8N_PORT: '5678',
+      N8N_PATH: isLocal ? '/' : '/n8n/',
+      WEBHOOK_URL: process.env.RENDER_EXTERNAL_URL || `http://localhost:3000`
     },
     stdio: 'inherit'
   });
@@ -68,10 +72,18 @@ app.use('/n8n', createProxyMiddleware({
 
 app.get('/api/info', (req, res) => {
   const isLocal = !process.env.RENDER_EXTERNAL_URL;
-  const baseUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+  let n8nUrl;
+  
+  if (isLocal) {
+    n8nUrl = `http://localhost:5678`;
+  } else {
+    // Render supports multiple ports - use direct port access
+    const renderUrl = process.env.RENDER_EXTERNAL_URL.replace('https://', '').replace('http://', '');
+    n8nUrl = `https://${renderUrl}:5678`;
+  }
   
   res.json({
-    n8nUrl: isLocal ? `http://localhost:5678` : `${baseUrl}/n8n`,
+    n8nUrl,
     status: n8nProcess ? 'running' : 'stopped',
     uptime: Math.floor(process.uptime()),
     todayPin: getDailyPin()
